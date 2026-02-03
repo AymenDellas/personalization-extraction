@@ -43,6 +43,8 @@ def _extract_visible_text(page: Page) -> str:
     text = content_locator.inner_text().strip()
     if not text:
         text = page.locator("body").inner_text().strip()
+    if not text:
+        text = page.evaluate("() => document.body ? document.body.innerText : ''").strip()
     return text
 
 
@@ -71,6 +73,11 @@ def scrape_generic_website(url: str, headless: bool = True) -> str | None:
                 page.wait_for_load_state("networkidle", timeout=8000)
             except Exception:
                 print("Network idle timeout, continuing with rendered content.")
+
+            try:
+                page.wait_for_selector("body", timeout=5000)
+            except Exception:
+                print("Body selector not ready, continuing with rendered content.")
 
             try:
                 _follow_linkedin_redirect(page)
