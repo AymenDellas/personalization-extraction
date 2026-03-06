@@ -87,6 +87,36 @@ def scrape_website():
          print(f"Website scrape error: {repr(e)}")
          return jsonify({"error": f"Server Error: {str(e)}"}), 500
 
+# ── Personalize API ────────────────────────────────────────────────
+
+@app.route('/api/personalize', methods=['POST'])
+def personalize():
+    data = request.json
+    website = data.get('website')
+
+    if not website:
+        return jsonify({"error": "website field is required"}), 400
+
+    print(f"Received personalize request for: {website}")
+
+    try:
+        text = scrape_generic_website(website, headless=True)
+        if not text:
+            return jsonify({"error": "Failed to scrape website."}), 500
+
+        site_data = extract_website_data(text)
+        if not site_data:
+            return jsonify({"error": "Failed to extract insights from website text."}), 500
+
+        return jsonify(site_data)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"Personalize error: {repr(e)}")
+        return jsonify({"error": f"Server Error: {str(e)}"}), 500
+
+
 if __name__ == '__main__':
     print("Starting Flask server on http://localhost:5000")
     app.run(debug=True, port=5000)
