@@ -53,7 +53,10 @@ def scrape_generic_website(url: str, headless: bool = True) -> str | None:
     Opens a generic website and extracts the visible text from the rendered page.
     """
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
+        browser = p.chromium.launch(
+            headless=headless,
+            args=["--no-sandbox", "--disable-dev-shm-usage"],
+        )
         context = browser.new_context(
             user_agent=(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
